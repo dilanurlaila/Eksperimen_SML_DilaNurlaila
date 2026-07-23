@@ -1,0 +1,36 @@
+name: Preprocessing Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas scikit-learn
+
+      - name: Run preprocessing
+        run: |
+          python preprocessing/automate_DilaNurlaila.py \
+            --input diabetes_raw/diabetes.csv \
+            --output diabetes_preprocessing
+
+      - name: Commit and push updated preprocessing result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add diabetes_preprocessing
+          git diff --staged --quiet || git commit -m "Auto-update hasil preprocessing [skip ci]"
+          git push
